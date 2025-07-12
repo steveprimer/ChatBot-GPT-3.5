@@ -17,7 +17,7 @@ function App() {
     setInput("");
 
     try {
-      const res = await axios.post("https://your-backend-url/chat", {
+      const res = await axios.post("https://chatbot-backend-5jwk.onrender.com", {
         messages: newMessages,
       });
 
