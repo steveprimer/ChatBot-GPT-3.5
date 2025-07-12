@@ -13,7 +13,7 @@ const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  // max: 10,
+  max: 100,
 });
 
 app.use("/chat", limiter); // apply to chat route
@@ -38,7 +38,8 @@ app.post("/chat", async (req, res) => {
 
     res.json({ reply: response.data.choices[0].message.content });
   } catch (err) {
-    console.error(err.message);
+    console.error("OpenAI API error:", err.response?.data || err.message);
+
     res.status(500).send("Error generating response");
   }
 });
