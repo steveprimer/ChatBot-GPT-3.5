@@ -9,12 +9,34 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef(null);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+const [videoLoaded, setVideoLoaded] = useState(false);
 
   const storeInfo = `
 Return Policy: You can return products within 7 days of delivery.
 Shipping: We offer free shipping on all orders above ₹999.
 Product Info: All our skincare products are vegan and cruelty-free.
 `;
+
+  useEffect(() => {
+  if (loadingProgress < 100) {
+    const interval = setInterval(() => {
+      setLoadingProgress(prev => {
+        const next = prev + Math.floor(Math.random() * 5) + 1;
+        return next >= 100 ? 100 : next;
+      });
+    }, 80);
+
+    return () => clearInterval(interval);
+  }
+}, [loadingProgress]);
+
+const handleVideoLoaded = () => {
+  setLoadingProgress(100);
+  setTimeout(() => {
+    setVideoLoaded(true);
+  }, 500); // brief delay for smooth transition
+};
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,6 +83,48 @@ Product Info: All our skincare products are vegan and cruelty-free.
 
   return (
     <>
+
+    {!videoLoaded && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backgroundColor: "#0a0014",
+      color: "#FF00FF",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 99999,
+      transition: "opacity 0.5s ease",
+    }}
+  >
+    <h2 style={{ fontSize: "2rem", marginBottom: "1rem" }}>Loading</h2>
+    <div
+      style={{
+        width: "80%",
+        height: "10px",
+        background: "#222",
+        borderRadius: "10px",
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: `${loadingProgress}%`,
+          height: "100%",
+          background: "linear-gradient(to right, #FF00FF, #00FFFF)",
+          transition: "width 0.3s ease",
+        }}
+      ></div>
+    </div>
+    <p style={{ marginTop: "1rem", fontSize: "1.2rem" }}>{loadingProgress}%</p>
+  </div>
+)}
+
       <style>
         {`
           @keyframes blink {
@@ -69,6 +133,100 @@ Product Info: All our skincare products are vegan and cruelty-free.
           }
         `}
       </style>
+
+      {/* Hero Section with Neon Background */}
+<div
+  style={{
+    position: "relative",
+    width: "100%",
+    height: "100vh",
+    overflow: "hidden",
+  }}
+>
+  {/* Background Video */}
+  <video
+  autoPlay
+  loop
+  muted
+  playsInline
+  onLoadedData={handleVideoLoaded}
+  style={{
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    zIndex: -2,
+  }}
+  src="/aichatbot(1).mp4"
+/>
+
+
+  {/* Overlay */}
+  <div
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      height: "100%",
+      width: "100%",
+      backgroundColor: "rgba(0, 0, 0, 0.4)",
+      zIndex: -1,
+    }}
+  />
+
+  {/* Hero Content */}
+  <div
+    style={{
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      color: "#FF00FF",
+      padding: "0 1rem",
+      zIndex: 1,
+    }}
+  >
+    <h1
+      style={{
+        fontSize: "3rem",
+        fontWeight: "bold",
+        textShadow: "0 0 15px #FF00FF",
+        marginBottom: "1rem",
+      }}
+    >
+      AI Chat Support Bot
+    </h1>
+    <p
+      style={{
+        fontSize: "1.25rem",
+        maxWidth: "600px",
+        color: "#ffffffcc",
+        textShadow: "0 0 10px #FF00FF",
+        lineHeight: "1.6",
+      }}
+    >
+      24/7 Automated Replies · Live Order Help · Return & Shipping Info · Product Details · Personalized Guidance
+    </p>
+    <p
+  style={{
+    fontSize: "3rem",
+    maxWidth: "600px",
+    fontWeight: "bold",
+    color: "#ffffffff",
+    // textShadow: "0 0 10px #00aeffff",
+    lineHeight: "1.6",
+  }}
+>
+  Powered by Scale<span style={{ color: "#0095ffff" }}>Bridge</span>
+</p>
+
+  </div>
+</div>
+
 
       {/* Floating Button */}
       <div
