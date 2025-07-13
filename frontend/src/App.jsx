@@ -220,11 +220,11 @@ const handleVideoLoaded = () => {
     lineHeight: "1.6",
   }}
 >
-  Powered by Scale
-  <a
+  Powered by <a
     href="https://scalebridge.netlify.app"
-    style={{ textDecoration: "none" }}
-  >
+    style={{ textDecoration: "none", color: "#ffffffff" }}
+  >Scale
+  
     <span style={{ color: "#0095ff" }}>Bridge</span>
   </a>
 </p>
