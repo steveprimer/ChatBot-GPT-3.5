@@ -13,20 +13,27 @@ const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 100,
+  max: 10,
 });
 
 app.use("/chat", limiter); // apply to chat route
 
 app.post("/chat", async (req, res) => {
-  const { messages } = req.body; // full chat history expected from frontend
+  const { messages, storeInfo } = req.body;
+
+  const systemMessage = {
+    role: "system",
+    content: `You are a helpful AI assistant for an eCommerce brand. Be concise and use the following info to answer like a customer support rep:\n\n${storeInfo}`,
+  };
+
+  const fullMessages = [systemMessage, ...messages];
 
   try {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
         model: "gpt-3.5-turbo",
-        messages: messages, // ✅ Send full chat history
+        messages: fullMessages, // ✅ Send full chat history
       },
       {
         headers: {
