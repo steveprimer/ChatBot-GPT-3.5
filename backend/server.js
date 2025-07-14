@@ -23,7 +23,7 @@ app.post("/chat", async (req, res) => {
 
   const systemMessage = {
     role: "system",
-    content: `You are a helpful AI assistant for an eCommerce brand. Be concise and use the following info to answer like a customer support rep:\n\n${storeInfo}`,
+    content: `You are a helpful, concise AI support assistant for an Ecommerce brand. Only answer questions based on the store info provided. If unsure, politely guide the user to schedule a call or visit the website. Stay on topic and avoid unnecessary details.\n\n${storeInfo}`,
   };
 
   const fullMessages = [systemMessage, ...messages];
