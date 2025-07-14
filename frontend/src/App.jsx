@@ -42,6 +42,21 @@ const handleVideoLoaded = () => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
 
+  useEffect(() => {
+  if (isOpen && chat.length === 0) {
+    setIsTyping(true);
+    const welcomeText = "Hi there! 👋 I'm your AI assistant. Feel free to ask me anything about our products, shipping, or return policies!";
+
+    setTimeout(() => {
+      const botMessage = { sender: "Bot", text: welcomeText };
+      setChat([botMessage]);
+      setMessages([{ role: "assistant", content: welcomeText }]);
+      setIsTyping(false);
+    }, 1200); // 1.2s delay
+  }
+}, [isOpen]);
+
+
   const handleSend = async () => {
     if (!input.trim()) return;
 
