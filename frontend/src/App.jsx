@@ -11,12 +11,18 @@ function App() {
   const chatEndRef = useRef(null);
   const [loadingProgress, setLoadingProgress] = useState(0);
 const [videoLoaded, setVideoLoaded] = useState(false);
+const [showPopup, setShowPopup] = useState(false);
 
   const storeInfo = `
 Return Policy: You can return products within 7 days of delivery.
 Shipping: We offer free shipping on all orders above ₹999.
 Product Info: All our skincare products are vegan and cruelty-free.
 `;
+
+useEffect(() => {
+  const timer = setTimeout(() => setShowPopup(true), 8000);
+  return () => clearTimeout(timer);
+}, []);
 
   useEffect(() => {
   if (loadingProgress < 100) {
@@ -148,7 +154,7 @@ const handleVideoLoaded = () => {
           }
         `}
       </style>
-
+       
       {/* Hero Section with Neon Background */}
 <div
   style={{
@@ -247,6 +253,48 @@ const handleVideoLoaded = () => {
 
   </div>
 </div>
+
+{showPopup && (
+  <div
+    style={{
+      position: "fixed",
+      bottom: "30px",
+      right: "100px",
+      backgroundColor: "#0f172a",
+      color: "white",
+      border: "1px solid #FF00FF", // blue-600
+      borderRadius: "10px",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+      padding: "12px 16px",
+      zIndex: 9999,
+      animation: "fadeIn 0.5s ease-in-out",
+    }}
+  >
+    <p style={{ fontSize: "14px", margin: 0 }}>
+      💬 Chat with our AI assistant for instant help!
+    </p>
+    <button
+      onClick={() => {
+        setShowPopup(false);
+        setIsOpen(true);
+      }}
+      style={{
+        marginTop: "8px",
+        color: "#FF00FF",
+        background: "none",
+        border: "none",
+        fontSize: "13px",
+        textDecoration: "underline",
+        cursor: "pointer",
+        padding: 0,
+      }}
+    >
+      Open Chat
+    </button>
+  </div>
+)}
+
+
 
 
       {/* Floating Button */}

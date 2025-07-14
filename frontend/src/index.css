@@ -75,3 +75,8 @@ html, body, #root {
   width: 100%;
   overflow-x: hidden;
 }
+
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
