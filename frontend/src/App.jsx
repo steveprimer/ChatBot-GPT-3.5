@@ -17,6 +17,12 @@ function App() {
   const isMobile = window.innerWidth <= 480;
 const chatHeight = isMobile ? "75vh" : "500px";
 const chatWidth = isMobile ? "85vw" : "320px";
+const handleKeyDown = (e) => {
+  if (e.key === "Enter" && input.trim() !== "") {
+    handleSend(); // call your send function
+  }
+};
+
 
 
   const storeInfo = `
@@ -517,29 +523,46 @@ const handleSuggestedMessage = (msg) => {
         </div>
 
         {/* Chat Input */}
-        <div style={{ display: "flex" }}>
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-            placeholder="Type your question..."
-            style={{
-              flex: 1, padding: "0.4rem 0.5rem", borderRadius: "10px", height: "30px",
-              border: "1px solid #C4008F", fontSize: "14px", outlineColor: "#C4008F"
-            }}
-          />
-          <button
-            onClick={handleSend}
-            style={{
-              marginLeft: "0.5rem", padding: "0.4rem 0.7rem", backgroundColor: "#C4008F",
-              color: "white", border: "none", borderRadius: "6px", fontSize: "20px",
-              cursor: "pointer"
-            }}
-          >
-            ➤
-          </button>
-        </div>
+        {/* Message Input */}
+<div style={{
+  display: "flex",
+  alignItems: "center",
+  marginTop: "auto",
+  gap: "0.5rem",
+  borderTop: "1px solid #444",
+  paddingTop: "0.5rem"
+}}>
+  <input
+    type="text"
+    value={input}
+    onChange={(e) => setInput(e.target.value)}
+    onKeyDown={handleKeyDown}
+    placeholder="Ask me anything..."
+    style={{
+      flex: 1, // allows the input to grow
+      padding: "0.5rem 0.75rem",
+      borderRadius: "10px",
+      border: "1px solid #ccc",
+      fontSize: "14px",
+      backgroundColor: "#f8f8f8",
+      color: "#000",
+      minWidth: 0 // important for flex shrinking!
+    }}
+  />
+  <button onClick={handleSend} style={{
+    backgroundColor: "#C4008F",
+    color: "white",
+    border: "none",
+    padding: "0.5rem 0.75rem",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontSize: "16px",
+    flexShrink: 0 // prevents it from shrinking or wrapping
+  }}>
+    ➤
+  </button>
+</div>
+
       </div>
     </>
   );
