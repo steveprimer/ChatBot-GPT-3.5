@@ -1,17 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
-import { BsChatText } from "react-icons/bs";
+import { FaRegMessage, FaUser } from "react-icons/fa6";
 
+// Main ChatBot Component
 function App() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState("");
-  const [chat, setChat] = useState([]);
-  const [messages, setMessages] = useState([]);
-  const [isTyping, setIsTyping] = useState(false);
-  const chatEndRef = useRef(null);
-  const [loadingProgress, setLoadingProgress] = useState(0);
-const [videoLoaded, setVideoLoaded] = useState(false);
-const [showPopup, setShowPopup] = useState(false);
+  // UI States
+  const [isOpen, setIsOpen] = useState(false); // Chat window toggle
+  const [input, setInput] = useState(""); // User input field
+  const [chat, setChat] = useState([]); // Chat history (display)
+  const [messages, setMessages] = useState([]); // Chat history (for backend)
+  const [isTyping, setIsTyping] = useState(false); // Bot typing animation
+  const [loadingProgress, setLoadingProgress] = useState(0); // Loading screen progress
+  const [videoLoaded, setVideoLoaded] = useState(false); // Hero video load check
+  const [showPopup, setShowPopup] = useState(false); // AI popup trigger
+  const chatEndRef = useRef(null); // Ref to scroll chat to bottom
 
   const storeInfo = `
 Return Policy: You can return products within 7 days of delivery.
@@ -19,35 +21,36 @@ Shipping: We offer free shipping on all orders above ₹999.
 Product Info: All our skincare products are vegan and cruelty-free.
 `;
 
-useEffect(() => {
-  const timer = setTimeout(() => setShowPopup(true), 8000);
-  return () => clearTimeout(timer);
-}, []);
-
+  // Show popup after 8 seconds
   useEffect(() => {
-  if (loadingProgress < 100) {
-    const interval = setInterval(() => {
-      setLoadingProgress(prev => {
-        const next = prev + Math.floor(Math.random() * 5) + 1;
-        return next >= 100 ? 100 : next;
-      });
-    }, 80);
+    const timer = setTimeout(() => setShowPopup(true), 8000);
+    return () => clearTimeout(timer);
+  }, []);
 
-    return () => clearInterval(interval);
-  }
-}, [loadingProgress]);
+  // Progress bar simulation for loading screen
+  useEffect(() => {
+    if (loadingProgress < 100) {
+      const interval = setInterval(() => {
+        setLoadingProgress(prev => {
+          const next = prev + Math.floor(Math.random() * 5) + 1;
+          return next >= 100 ? 100 : next;
+        });
+      }, 80);
+      return () => clearInterval(interval);
+    }
+  }, [loadingProgress]);
 
-const handleVideoLoaded = () => {
-  setLoadingProgress(100);
-  setTimeout(() => {
-    setVideoLoaded(true);
-  }, 500); // brief delay for smooth transition
-};
+  // Callback when hero video is loaded
+  const handleVideoLoaded = () => {
+    setLoadingProgress(100);
+    setTimeout(() => setVideoLoaded(true), 500); // smooth transition
+  };
 
+  // Scroll to latest message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
-
+  
   useEffect(() => {
   if (isOpen && chat.length === 0) {
     setIsTyping(true);
@@ -63,44 +66,53 @@ const handleVideoLoaded = () => {
 }, [isOpen]);
 
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  // Handle sending user message
+ const handleSend = async (customInput) => {
+  const messageToSend = customInput || input;
+  if (!messageToSend.trim()) return;
 
-    const userMessage = { sender: "You", text: input };
-    const newMessages = [...messages, { role: "user", content: input }];
+  const userMessage = { sender: "You", text: messageToSend };
+  const newMessages = [...messages, { role: "user", content: messageToSend }];
 
-    setChat([...chat, userMessage]);
-    setMessages(newMessages);
-    setInput("");
-    setIsTyping(true);
+  setChat([...chat, userMessage]);
+  setMessages(newMessages);
+  setInput("");
+  setIsTyping(true);
 
-    try {
-      const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chat`, {
-        messages: newMessages,
-        storeInfo,
-      });
+  try {
+    const res = await axios.post(`${import.meta.env.VITE_BACKEND_URL}/chat`, {
+      messages: newMessages,
+      storeInfo,
+    });
 
-      const botText = res.data.reply;
-      const botMessage = { sender: "Bot", text: botText };
-      setChat(prev => [...prev, botMessage]);
-      setMessages(prev => [...prev, { role: "assistant", content: botText }]);
-    } catch (err) {
-      console.error(err);
-      const errorMessage = { sender: "Bot", text: "Something went wrong." };
-      setChat(prev => [...prev, errorMessage]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
+    const botText = res.data.reply;
+    const botMessage = { sender: "Bot", text: botText };
+    setChat(prev => [...prev, botMessage]);
+    setMessages(prev => [...prev, { role: "assistant", content: botText }]);
+  } catch (err) {
+    console.error(err);
+    setChat(prev => [...prev, { sender: "Bot", text: "That was unexpected." }]);
+  } finally {
+    setIsTyping(false);
+  }
+};
 
-  const dotStyle = {
-    width: "6px",
-    height: "6px",
-    backgroundColor: "#555",
-    borderRadius: "50%",
-    display: "inline-block",
-    animation: "blink 1.2s infinite ease-in-out",
-  };
+
+  // Typing indicator style
+  const waveDotStyle = {
+  width: "6px",
+  height: "6px",
+  borderRadius: "50%",
+  backgroundColor: "#C4008F", // Match brand color
+  display: "inline-block",
+  animation: "wave 1.2s infinite ease-in-out",
+};
+
+const handleSuggestedMessage = (msg) => {
+  setChat(prev => [...prev, { sender: "You", text: msg }]);
+  sendMessage(msg); // Call your existing message send function
+};
+
 
   return (
     <>
@@ -146,13 +158,18 @@ const handleVideoLoaded = () => {
   </div>
 )}
 
+       {/* Typing Animation Keyframes */}
       <style>
         {`
-          @keyframes blink {
-            0%, 80%, 100% { opacity: 0; }
-            40% { opacity: 1; }
-          }
-        `}
+    @keyframes wave {
+      0%, 60%, 100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-8px);
+      }
+    }
+  `}
       </style>
        
       {/* Hero Section with Neon Background */}
@@ -254,233 +271,270 @@ const handleVideoLoaded = () => {
   </div>
 </div>
 
-{showPopup && (
-  <div
-    style={{
-      position: "fixed",
-      bottom: "30px",
-      right: "100px",
-      backgroundColor: "#0f172a",
-      color: "white",
-      border: "1px solid #FF00FF", // blue-600
-      borderRadius: "10px",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-      padding: "12px 16px",
-      zIndex: 9999,
-      animation: "fadeIn 0.5s ease-in-out",
-    }}
-  >
-    <p style={{ fontSize: "14px", margin: 0 }}>
-      💬 Chat with our AI assistant for instant help!
-    </p>
-    <button
-      onClick={() => {
-        setShowPopup(false);
-        setIsOpen(true);
-      }}
-      style={{
-        marginTop: "8px",
-        color: "#FF00FF",
-        background: "none",
-        border: "none",
-        fontSize: "13px",
-        textDecoration: "underline",
-        cursor: "pointer",
-        padding: 0,
-      }}
-    >
-      Open Chat
-    </button>
-  </div>
-)}
-
-
-
-
-      {/* Floating Button */}
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        style={{
-          position: "fixed",
-          bottom: "20px",
-          right: "20px",
-          backgroundColor: "#000000",
-          color: "#fff",
-          borderRadius: "50%",
-          width: "60px",
-          height: "60px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "26px",
-          fontWeight: "bold",
-          cursor: "pointer",
-          zIndex: 9999,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-          transition: "0.3s ease",
-        }}
-        title={isOpen ? "Close Chat" : "Open Chat"}
-      >
-        <div
-          style={{
-            position: "relative",
-            width: "28px",
-            height: "28px",
-          }}
-        >
-          <span
+      {/* Popup Chat Teaser */}
+      {showPopup && (
+        <div style={{
+          position: "fixed", bottom: "20px", right: "100px", backgroundColor: "#0f172a",
+          color: "white", border: "1px solid #efe9e9ff", borderRadius: "10px",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)", padding: "12px 16px", zIndex: 9999
+        }}>
+          <p style={{ fontSize: "14px", margin: 0 }}> Chat with our AI assistant for instant help!</p>
+          <button onClick={() => { setShowPopup(false); setIsOpen(true); }}
             style={{
-              position: "absolute",
-              inset: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#FF00FF",
-              fontSize: "28px",
-              opacity: isOpen ? 1 : 0,
-              transition: "opacity 0.3s ease, transform 0.3s ease",
-              transform: isOpen ? "scale(1)" : "scale(0.8)",
-            }}
-          >
-            ✖
-          </span>
+              marginTop: "8px", color: "#fd1616ff", background: "none", border: "none",
+              fontSize: "13px", textDecoration: "underline", cursor: "pointer", padding: 0
+            }}>
+            Open Chat
+          </button>
+        </div>
+      )}
 
-          <BsChatText
+      {/* Floating Toggle Button */}
+      <div onClick={() => {setIsOpen(!isOpen); setShowPopup(false);}} style={{
+        position: "fixed", bottom: "20px", right: "20px", backgroundColor: "#fff7caff",
+        color: "#fff", borderRadius: "50%", width: "60px", height: "60px",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", zIndex: 9999, boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)"
+        
+      }}>
+        <div style={{ position: "relative", width: "28px", height: "28px" }}>
+          <span style={{
+            position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+            color: "#C4008F", fontSize: "28px", opacity: isOpen ? 1 : 0,
+            transition: "opacity 0.3s ease, transform 0.3s ease",
+            transform: isOpen ? "scale(1)" : "scale(0.8)"
+          }}>✖</span>
+          <FaRegMessage 
             size={28}
-            color="#FF00FF"
+            color="#C4008F"
             style={{
-              position: "absolute",
-              inset: 0,
-              stroke: "#FF00FF",
-              strokeWidth: 1,
-              opacity: isOpen ? 0 : 1,
+              position: "absolute", inset: 0, stroke: "#C4008F", strokeWidth: 25,
+              opacity: isOpen ? 0 : 1, transform: isOpen ? "scale(0.5)" : "scale(1)",
               transition: "opacity 0.3s ease, transform 0.3s ease",
-              transform: isOpen ? "scale(0.5)" : "scale(1)",
+              // filter: "drop-shadow(0 0 4px #C4008F)"
             }}
           />
         </div>
       </div>
 
-      {/* Chat Window Wrapper (always rendered) */}
-{/* Chat Window Wrapper (always rendered) */}
-<div
-  style={{
-    position: "fixed",
-    bottom: "90px",
-    right: "20px",
-    width: "320px",
-    height: isOpen ? "500px" : "0px",
-    backgroundColor: "#fff0ff", // light magenta tint
-    color: "#000",
-    border: "2px solid #FF00FF",
-    borderRadius: "12px",
-    padding: isOpen ? "1rem" : "0 1rem",
-    zIndex: 9998,
-    display: "flex",
-    flexDirection: "column",
-    boxShadow: "0 6px 20px rgba(255, 0, 255, 0.3)",
-    overflow: "hidden",
-    maxHeight: isOpen ? "500px" : "0px",
-    opacity: isOpen ? 1 : 0,
-    transform: isOpen ? "translateY(0px)" : "translateY(20px)",
-    pointerEvents: isOpen ? "auto" : "none",
-    transition: "max-height 0.4s ease, opacity 0.3s ease, transform 0.3s ease, padding 0.3s ease",
-  }}
->
+      {/* Background Blur Overlay */}
+{isOpen && (
   <div
+    onClick={() => setIsOpen(false)} // optional: clicking outside closes chat
     style={{
-      fontWeight: "700",
-      fontSize: "16px",
-      marginBottom: "0.8rem",
-      color: "#fff",
-      backgroundColor: "#FF00FF",
-      textAlign: "center",
-      borderRadius: "8px",
-      padding: "0.5rem 0",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      backdropFilter: "blur(6px)",
+      WebkitBackdropFilter: "blur(6px)",
+      backgroundColor: "rgba(0, 0, 0, 0.2)", // optional darken
+      zIndex: 9997, // just below chat window (9998)
+      transition: "all 0.3s ease",
     }}
-  >
-    AI Chat Support
-  </div>
+  />
+)}
 
+
+      {/* Chat Window */}
+      <div style={{
+        position: "fixed", bottom: "90px", right: "20px", width: "320px",
+        height: isOpen ? "500px" : "0px", background: "linear-gradient(145deg, #58002aff, #1a1a1a)",
+        color: "#f2f2f2", border: "1.5px solid #C4008F", borderRadius: "15px",
+        padding: isOpen ? "1rem" : "0 1rem", zIndex: 9998, display: "flex", flexDirection: "column",
+        boxShadow: "0 0 12px rgba(196, 0, 143, 0.5)", overflow: "hidden",
+        opacity: isOpen ? 1 : 0, transform: isOpen ? "translateY(0)" : "translateY(20px)",
+        transition: "all 0.3s ease", pointerEvents: isOpen ? "auto" : "none"
+      }}>
+        <div style={{
+          fontFamily: "Inter, sans-serif", color: "#fff",
+  fontWeight: "700",
+  fontSize: "16px",
+  marginBottom: "0rem",
+  width: "40%", // Set exact width
+  backgroundColor: "#C4008F",
+  textAlign: "center",
+  borderRadius: "20px",
+  padding: "0.5rem 0",
+  boxShadow: "0 0 8px #C4008F",
+  margin: "0 auto", // Center horizontally
+ 
+}}>
+  AI Support
+</div>
+
+        {/* Chat Messages */}
+        <div style={{
+          flex: 1, overflowY: "auto", marginBottom: "0.5rem", 
+          padding: "0.5rem", borderRadius: "6px", backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)", backgroundColor: "rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 0   8px rgba(0, 0, 0, 0.1)",
+        }}>
+          {chat.map((msg, i) => (
   <div
+    key={i}
     style={{
-      flex: 1,
-      overflowY: "auto",
-      marginBottom: "0.5rem",
-      border: "1px solid #FFB3FF",
-      padding: "0.5rem",
-      borderRadius: "6px",
-      height: "100%",
-      backgroundColor: "#fff8ff",
+      display: "flex",
+      justifyContent: msg.sender === "You" ? "flex-end" : "flex-start",
+      alignItems: "flex-end",
+      marginBottom: "12px",
     }}
   >
-    {chat.map((msg, i) => (
-      <p key={i} style={{ margin: "0.4rem 0" }}>
-        <strong style={{ color: msg.sender === "You" ? "#FF00FF" : "#333" }}>
-          {msg.sender}:
-        </strong>{" "}
-        {msg.text}
-      </p>
-    ))}
-    <div ref={chatEndRef} />
-    {isTyping && (
+    {/* Avatar for Bot */}
+    {msg.sender !== "You" && (
       <div
         style={{
+          width: "32px",
+          height: "32px",
+          backgroundColor: "#C4008F",
+          borderRadius: "50%",
           display: "flex",
           alignItems: "center",
-          gap: "6px",
-          marginTop: "4px",
-          paddingLeft: "2px",
+          justifyContent: "center",
+          marginRight: "8px",
         }}
       >
-        <strong style={{ color: "#333" }}>Bot:</strong>
-        <div style={{ display: "flex", gap: "3px" }}>
-          <span style={{ ...dotStyle, backgroundColor: "#FF00FF" }}></span>
-          <span style={{ ...dotStyle, backgroundColor: "#FF00FF", animationDelay: "0.2s" }}></span>
-          <span style={{ ...dotStyle, backgroundColor: "#FF00FF", animationDelay: "0.4s" }}></span>
-        </div>
+        <FaRegMessage color="#fff" size={16} />
+      </div>
+    )}
+
+    {/* Message Bubble */}
+    <div
+      style={{
+        backgroundColor: msg.sender === "You" ? "#C4008F" : "#2C2C2E",
+        color: "#fff",
+        padding: "10px 14px",
+        borderRadius: "16px",
+        maxWidth: "75%",
+        fontSize: "14px",
+        lineHeight: "1.5",
+        whiteSpace: "pre-wrap",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+      }}
+    >
+      {msg.text}
+    </div>
+
+    {/* Avatar for User */}
+    {msg.sender === "You" && (
+      <div
+        style={{
+          width: "32px",
+          height: "32px",
+          backgroundColor: "#C4008F",
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginLeft: "8px",
+        }}
+      >
+        <FaUser color="#fff" size={16} />
       </div>
     )}
   </div>
+))}
 
-  <div style={{ display: "flex" }}>
-    <input
-      type="text"
-      value={input}
-      onChange={e => setInput(e.target.value)}
-      onKeyDown={e => e.key === "Enter" && handleSend()}
+
+          <div ref={chatEndRef} />
+          {/* Typing Animation */}
+          {isTyping && (
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "flex-start",
+      alignItems: "flex-end",
+      marginBottom: "12px",
+    }}
+  >
+    {/* Avatar Icon */}
+    <div
       style={{
-        flex: 1,
-        padding: "0.4rem 0.5rem",
-        borderRadius: "6px",
-        border: "1px solid #FF00FF",
-        fontSize: "14px",
-        outlineColor: "#FF00FF",
-      }}
-      placeholder="Type your question..."
-    />
-    <button
-      onClick={handleSend}
-      style={{
-        marginLeft: "0.5rem",
-        padding: "0.4rem 0.7rem",
-        backgroundColor: "#FF00FF",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        fontSize: "14px",
-        cursor: "pointer",
+        width: "32px",
+        height: "32px",
+        backgroundColor: "#C4008F",
+        borderRadius: "50%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: "8px",
       }}
     >
-      ➤
-    </button>
+      <FaRegMessage color="#fff" size={16} />
+    </div>
+
+    {/* Typing Bubble with Wave Animation */}
+    <div
+      style={{
+        backgroundColor: "#2C2C2E",
+        padding: "10px 14px",
+        borderRadius: "16px",
+        display: "flex",
+        gap: "4px",
+      }}
+    >
+      <div style={{ ...waveDotStyle, animationDelay: "0s" }} />
+<div style={{ ...waveDotStyle, animationDelay: "0.2s" }} />
+<div style={{ ...waveDotStyle, animationDelay: "0.4s" }} />
+
+    </div>
   </div>
+)}
+{/* Suggested Questions */}
+<div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+  {["Where is my order?", "What’s your return policy?", "How long is shipping?", "Do you ship internationally?"].map((q, idx) => (
+    <div
+      key={idx}
+      onClick={() => handleSend(q)}
+      style={{
+        backgroundColor: "#fff7ca",
+        color: "#000",
+        padding: "6px 10px",
+        borderRadius: "12px",
+        fontSize: "13px",
+        cursor: "pointer",
+        boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+        transition: "background 0.3s",
+      }}
+    >
+      {q}
+    </div>
+  ))}
 </div>
 
 
-      
+
+        </div>
+
+        {/* Chat Input */}
+        <div style={{ display: "flex" }}>
+          <input
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSend()}
+            placeholder="Type your question..."
+            style={{
+              flex: 1, padding: "0.4rem 0.5rem", borderRadius: "10px", height: "30px",
+              border: "1px solid #C4008F", fontSize: "14px", outlineColor: "#C4008F"
+            }}
+          />
+          <button
+            onClick={handleSend}
+            style={{
+              marginLeft: "0.5rem", padding: "0.4rem 0.7rem", backgroundColor: "#C4008F",
+              color: "white", border: "none", borderRadius: "6px", fontSize: "20px",
+              cursor: "pointer"
+            }}
+          >
+            ➤
+          </button>
+        </div>
+      </div>
     </>
   );
 }
+
 
 export default App;
