@@ -14,6 +14,10 @@ function App() {
   const [videoLoaded, setVideoLoaded] = useState(false); // Hero video load check
   const [showPopup, setShowPopup] = useState(false); // AI popup trigger
   const chatEndRef = useRef(null); // Ref to scroll chat to bottom
+  const isMobile = window.innerWidth <= 480;
+const chatHeight = isMobile ? "75vh" : "500px";
+const chatWidth = isMobile ? "85vw" : "320px";
+
 
   const storeInfo = `
 Return Policy: You can return products within 7 days of delivery.
@@ -339,14 +343,19 @@ const handleSuggestedMessage = (msg) => {
 
       {/* Chat Window */}
       <div style={{
-        position: "fixed", bottom: "90px", right: "20px", width: "320px",
-        height: isOpen ? "500px" : "0px", background: "linear-gradient(145deg, #58002aff, #1a1a1a)",
-        color: "#f2f2f2", border: "1.5px solid #C4008F", borderRadius: "15px",
-        padding: isOpen ? "1rem" : "0 1rem", zIndex: 9998, display: "flex", flexDirection: "column",
-        boxShadow: "0 0 12px rgba(196, 0, 143, 0.5)", overflow: "hidden",
-        opacity: isOpen ? 1 : 0, transform: isOpen ? "translateY(0)" : "translateY(20px)",
-        transition: "all 0.3s ease", pointerEvents: isOpen ? "auto" : "none"
-      }}>
+  position: "fixed", bottom: "90px", right: "2%",
+  width: chatWidth,
+  height: isOpen ? chatHeight : "0px",
+  background: "linear-gradient(145deg, #58002aff, #1a1a1a)",
+  color: "#f2f2f2", border: "1.5px solid #C4008F", borderRadius: "15px",
+  padding: isOpen ? "1rem" : "0 1rem", zIndex: 9998,
+  display: "flex", flexDirection: "column",
+  boxShadow: "0 0 12px rgba(196, 0, 143, 0.5)", overflow: "hidden",
+  opacity: isOpen ? 1 : 0,
+  transform: isOpen ? "translateY(0)" : "translateY(20px)",
+  transition: "all 0.3s ease", pointerEvents: isOpen ? "auto" : "none"
+}}>
+
         <div style={{
           fontFamily: "Inter, sans-serif", color: "#fff",
   fontWeight: "700",
