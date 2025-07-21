@@ -94,6 +94,7 @@ html, body, #root {
 @media (max-width: 500px) {
   .chat-teaser {
     right: 85px;
+    margin-left: 10px;
   }
 }
 
