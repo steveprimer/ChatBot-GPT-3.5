@@ -1,6 +1,6 @@
 import React from "react";
 import Hero from "./components/hero";
-import ChatBot from "./components/chatBot";
+import ChatBot from "./components/chatbot";
 
 function App() {
   return (
