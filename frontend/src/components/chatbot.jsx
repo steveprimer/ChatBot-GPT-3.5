@@ -5,6 +5,21 @@ import axios from "axios";
 import { MdArrowBackIosNew } from "react-icons/md";
 import { FaRegMessage, FaUser } from "react-icons/fa6";
 
+// === analytics helper ===
+function trackEvent(name, params = {}) {
+  if (window.gtag) {
+    window.gtag("event", name, {
+      client_embed: window.ChatbotConfig?.client || "self_hosted",
+      widget_version: window.ChatbotConfig?.widget_version || "dev",
+      session_id:
+        window.__CHATBOT_SESSION_ID__ ||
+        (window.__CHATBOT_SESSION_ID__ =
+          "s_" + Math.random().toString(36).slice(2, 9)),
+      ...params,
+    });
+  }
+}
+
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false); // Chat window toggle
   const [input, setInput] = useState(""); // User input field
@@ -18,6 +33,16 @@ export default function ChatBot() {
   const chatWidth = isMobile ? "85vw" : "320px";
   const [showWelcome, setShowWelcome] = useState(true);
   const [hasGreeted, setHasGreeted] = useState(false);
+
+  // track when widget opens and when it closes (send conversation length)
+  useEffect(() => {
+    if (isOpen) {
+      trackEvent("chat_opened");
+    } else {
+      // on close, record how long the conversation was (message count)
+      trackEvent("conversation_length", { total_messages: messages.length });
+    }
+  }, [isOpen]);
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && input.trim() !== "") {
@@ -42,6 +67,10 @@ export default function ChatBot() {
   }, [chat]);
 
   useEffect(() => {
+    trackEvent("chatbot_loaded");
+  }, []);
+
+  useEffect(() => {
     if (isOpen && !hasGreeted && !showWelcome) {
       setIsTyping(true);
       const welcomeText =
@@ -62,6 +91,8 @@ export default function ChatBot() {
     const messageToSend = customInput || input;
     if (!messageToSend.trim()) return;
 
+    trackEvent("message_sent", { message_length: messageToSend.length });
+
     const userMessage = { sender: "You", text: messageToSend };
     const newMessages = [...messages, { role: "user", content: messageToSend }];
 
@@ -77,6 +108,9 @@ export default function ChatBot() {
       });
 
       const botText = res.data.reply;
+
+      trackEvent("message_received", { reply_length: botText.length });
+
       const botMessage = { sender: "Bot", text: botText };
       setChat((prev) => [...prev, botMessage]);
       setMessages((prev) => [...prev, { role: "assistant", content: botText }]);
@@ -103,6 +137,9 @@ export default function ChatBot() {
 
   const handleSuggestedMessage = (msg) => {
     setChat((prev) => [...prev, { sender: "You", text: msg }]);
+
+    trackEvent("suggested_message_clicked", { suggestion: msg });
+
     handleSend(msg); // Call your existing message send function
   };
 
