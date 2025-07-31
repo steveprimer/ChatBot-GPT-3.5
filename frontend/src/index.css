@@ -217,6 +217,63 @@ html, body, #root {
   }
 }
 
+@media (max-width: 768px) {
+  nav ul {
+    display: none;
+  }
+
+  nav div[style*="hamburger"] {
+    display: block !important;
+  }
+}
+
+.laser-button {
+  position: relative;
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+  z-index: 100;
+}
+
+.laser-button::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #00f0ff, #3b82f6);
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.4s ease-out;
+  box-shadow: 0 0 10px #00f0ff;
+  z-index: -1;
+}
+
+.laser-button:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out;
+}
+
+
 
 
 
