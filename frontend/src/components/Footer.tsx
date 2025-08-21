@@ -19,7 +19,10 @@ const StarIcon = (props: React.SVGProps<SVGSVGElement>) => (
 // --- Main Footer Component ---
 export default function Footer() {
   return (
-    <footer className="bg-black text-gray-400 w-full px-4 sm:px-8 py-12">
+    <footer
+      id="about"
+      className="bg-black text-gray-400 w-full px-4 sm:px-8 py-12"
+    >
       <div className="max-w-7xl mx-auto">
         {/* Top Section: Logo and CTA */}
         <div className="flex flex-col sm:flex-row justify-between items-center pb-8 border-b border-gray-800">

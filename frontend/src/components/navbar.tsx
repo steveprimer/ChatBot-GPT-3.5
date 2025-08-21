@@ -11,7 +11,24 @@ const navLinks = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Variants for the main nav container (for staggered entry)
+  // --- Smooth Scrolling Function ---
+  const handleScroll = (
+    e: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    href: string
+  ) => {
+    e.preventDefault();
+    const targetId = href.replace(/.*#/, "");
+    const elem = document.getElementById(targetId);
+    elem?.scrollIntoView({
+      behavior: "smooth",
+    });
+    // Close mobile menu on link click
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  };
+
+  // Framer Motion variants for the main nav container
   const navVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -23,7 +40,7 @@ export default function Navbar() {
     },
   };
 
-  // Variants for individual child elements (for staggered entry)
+  // Variants for individual child elements
   const itemVariants: Variants = {
     hidden: { y: -20, opacity: 0 },
     visible: {
@@ -59,6 +76,7 @@ export default function Navbar() {
         {/* Logo */}
         <motion.a
           href="#"
+          onClick={(e) => handleScroll(e, "#")}
           variants={itemVariants}
           className="text-xl font-bold text-white tracking-wide"
         >
@@ -71,6 +89,7 @@ export default function Navbar() {
             <motion.a
               key={link.href}
               href={link.href}
+              onClick={(e) => handleScroll(e, link.href)} // ✅ Added onClick handler
               className="hover:text-white transition-colors duration-300"
               variants={itemVariants}
               whileHover={{ y: -2 }}
@@ -84,10 +103,9 @@ export default function Navbar() {
         {/* Desktop CTA Button with Wavy Fill Effect */}
         <motion.a
           href="#book"
-          // Controls the hover animations for children
+          onClick={(e) => handleScroll(e, "#book")} // ✅ Added onClick handler
           initial="initial"
           whileHover="hover"
-          // Controls the initial staggered animation
           variants={itemVariants}
           whileTap={{ scale: 0.95 }}
           className="
@@ -162,7 +180,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => handleScroll(e, link.href)} // ✅ Added onClick handler
                 className="text-gray-200 hover:text-white text-3xl font-semibold transition-colors"
               >
                 {link.title}
@@ -170,7 +188,7 @@ export default function Navbar() {
             ))}
             <a
               href="#book"
-              onClick={() => setIsOpen(false)}
+              onClick={(e) => handleScroll(e, "#book")} // ✅ Added onClick handler
               className="px-8 py-3 rounded-xl bg-red-600 text-white text-xl font-semibold shadow-md"
             >
               Book a Call

@@ -55,7 +55,7 @@ export default function ProcessSection() {
   const progressPercentage = (currentStep / (processSteps.length - 1)) * 100;
 
   return (
-    <section className="bg-black text-white w-full px-4 py-20">
+    <section id="process" className="bg-black text-white w-full px-4 py-20">
       <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
         {/* Headings */}
         <motion.p

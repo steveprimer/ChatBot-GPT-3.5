@@ -96,7 +96,10 @@ function ServicesSection() {
   const [activeService, setActiveService] = useState(services[0]);
 
   return (
-    <section className="bg-black text-white w-full max-w-4xl mx-auto px-4 py-20 text-center">
+    <section
+      id="services"
+      className="bg-black text-white w-full max-w-4xl mx-auto px-4 py-20 text-center"
+    >
       <motion.p
         className="text-red-500 font-semibold mb-4"
         initial={{ opacity: 0, y: 20 }}
