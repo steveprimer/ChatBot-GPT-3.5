@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { MdArrowBackIosNew } from "react-icons/md";
-import { FaUser } from "react-icons/fa6";
 
 // --- SVG Icon Components ---
 const StarIcon = (props) => (
@@ -38,6 +36,41 @@ const ChatIcon = (props) => (
   </svg>
 );
 
+// ✅ Replaced react-icons with inline SVGs
+const BackIcon = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 19.5L8.25 12l7.5-7.5"
+    />
+  </svg>
+);
+
+const UserIcon = (props) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    {...props}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+    />
+  </svg>
+);
+
 // --- Analytics Helper (Unchanged) ---
 function trackEvent(name, params = {}) {
   if (window.gtag) {
@@ -61,6 +94,7 @@ export default function ChatBot() {
   const [isTyping, setIsTyping] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const [hasGreeted, setHasGreeted] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const chatEndRef = useRef(null);
 
   const isMobile = typeof window !== "undefined" && window.innerWidth <= 640;
@@ -75,6 +109,15 @@ export default function ChatBot() {
   `;
 
   // --- Original useEffect Hooks ---
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isOpen) {
+        setShowPopup(true);
+      }
+    }, 8000);
+    return () => clearTimeout(timer);
+  }, [isOpen]);
 
   useEffect(() => {
     if (isOpen) {
@@ -177,9 +220,35 @@ export default function ChatBot() {
 
   return (
     <>
-      {/* --- Floating Toggle Button --- */}
+      <AnimatePresence>
+        {showPopup && !isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="fixed bottom-24 right-5 bg-gray-800 border border-gray-700 text-white p-4 rounded-lg shadow-xl z-[9998]"
+          >
+            <p className="text-sm text-gray-300">
+              Chat with our AI for instant help!
+            </p>
+            <button
+              onClick={() => {
+                setIsOpen(true);
+                setShowPopup(false);
+              }}
+              className="text-sm font-semibold text-red-500 mt-2 hover:underline"
+            >
+              Open Chat
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          setIsOpen(!isOpen);
+          setShowPopup(false);
+        }}
         className={`fixed bottom-5 right-5 w-16 h-16 bg-red-600 rounded-full items-center justify-center text-white shadow-lg shadow-red-500/50 z-[9999] cursor-pointer ${
           isOpen && isMobile ? "hidden" : "flex"
         }`}
@@ -217,11 +286,9 @@ export default function ChatBot() {
         </AnimatePresence>
       </motion.button>
 
-      {/* --- Chat Window --- */}
       <AnimatePresence>
         {isOpen && (
           <>
-            {/* Background Overlay (Desktop only) */}
             {!isMobile && (
               <motion.div
                 onClick={() => setIsOpen(false)}
@@ -232,7 +299,6 @@ export default function ChatBot() {
               />
             )}
 
-            {/* Chat Container */}
             <motion.div
               variants={isMobile ? mobileVariants : desktopVariants}
               initial="hidden"
@@ -246,7 +312,6 @@ export default function ChatBot() {
                   : "fixed bottom-24 right-5 bg-black border border-red-500/40 rounded-2xl shadow-2xl shadow-red-600/30 flex flex-col overflow-hidden z-[9999]"
               }
             >
-              {/* Header */}
               <div className="flex items-center p-4 border-b border-gray-700/50 relative flex-shrink-0">
                 <button
                   onClick={() =>
@@ -270,7 +335,7 @@ export default function ChatBot() {
                       />
                     </svg>
                   ) : (
-                    !showWelcome && <MdArrowBackIosNew size={20} />
+                    !showWelcome && <BackIcon className="w-5 h-5" />
                   )}
                 </button>
                 <h2 className="text-lg font-bold text-white text-center w-full">
@@ -278,7 +343,6 @@ export default function ChatBot() {
                 </h2>
               </div>
 
-              {/* Content Area */}
               <div className="flex-1 flex flex-col p-4 overflow-hidden">
                 {showWelcome ? (
                   <WelcomeScreen
@@ -288,7 +352,6 @@ export default function ChatBot() {
                   />
                 ) : (
                   <>
-                    {/* Messages */}
                     <div className="flex-1 space-y-4 overflow-y-auto pr-2 -mr-2">
                       {chat.map((msg, i) => (
                         <Message key={i} sender={msg.sender} text={msg.text} />
@@ -297,7 +360,6 @@ export default function ChatBot() {
                       <div ref={chatEndRef} />
                     </div>
 
-                    {/* Suggested Questions in Chat */}
                     {chat.length > 0 &&
                       chat[chat.length - 1].sender === "Bot" &&
                       !isTyping && (
@@ -319,7 +381,6 @@ export default function ChatBot() {
                         </motion.div>
                       )}
 
-                    {/* Input Area */}
                     <div className="mt-4 flex items-center space-x-2 flex-shrink-0">
                       <input
                         type="text"
@@ -420,7 +481,7 @@ const Message = ({ sender, text }) => {
       </div>
       {!isBot && (
         <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center flex-shrink-0">
-          <FaUser className="w-4 h-4 text-red-500" />
+          <UserIcon className="w-4 h-4 text-red-500" />
         </div>
       )}
     </motion.div>
