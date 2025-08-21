@@ -309,7 +309,7 @@ export default function ChatBot() {
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ask anything..."
-                        className="flex-1 bg-gray-900 text-white placeholder-gray-500 px-4 py-2 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all"
+                        className="flex-1 bg-gray-900 text-white placeholder-gray-500 px-4 py-2 rounded-md border border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all min-w-0"
                       />
                       <motion.button
                         onClick={() => handleSend()}
